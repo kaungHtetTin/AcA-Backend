@@ -110,6 +110,111 @@ class User{
         }
        
     }
+
+    public function checkPassword($data){
+        $user_id=$data['user_id'];
+        $password=$data['password'];
+        $DB=new Database();
+        $query="select * from users where user_id='$user_id' limit 1";
+        $result=$DB->read($query);
+
+         if($result){
+            $row=$result[0];
+            $email=$row['email'];
+            $key = "koko&yoe"; 
+            $encrypt_password = md5(md5($email . $password) . $key);
+            if($row['password']==$encrypt_password){
+                $response['code']="50";
+                $response['msg']="Please enter your new password.";
+            }else{
+                $response['code']="51";
+                $response['msg']="Incorrect password! Please try again.";
+            }
+        }else{
+            $response['code']="51";
+            $response['msg']="Unexpected Error! Please try again later.";
+          
+        }
+
+        return $response;
+    }
+
+    public function resetPassword($data){
+
+        $user_id=$data['user_id'];
+        $currentPassword=$data['currentPassword'];
+        $newPassword=$data['newPassword'];
+
+        $DB=new Database();
+        $query="select * from users where user_id='$user_id' limit 1";
+        $result=$DB->read($query);
+
+         if($result){
+            $row=$result[0];
+            $email=$row['email'];
+            $key = "koko&yoe"; 
+            $encrypt_password = md5(md5($email . $currentPassword) . $key);
+            if($row['password']==$encrypt_password){
+                $encrypt= md5(md5($email . $newPassword) . $key);
+                $query="update users set password='$encrypt' where user_id=$user_id";
+                $saving=$DB->save($query);
+                if($saving){
+                    $response['code']="50";
+                    $response['msg']="Your password has been reset successfully.";
+                }else{
+                    $response['code']="51";
+                    $response['msg']="Unexpected Error! Please try again later.";
+                }
+
+            }else{
+                $response['code']="51";
+                $response['msg']="Incorrect password! Please try again.";
+            }
+        }else{
+            $response['code']="51";
+            $response['msg']="Unexpected Error! Please try again later.";
+          
+        }
+
+        return $response;
+    }
+
+
+    public function generateOTP($data){
+        $email=$data['email'];
+
+        $otp=$this->OTP();
+        $DB=new Database();
+        $query="select * from users where email='$email' limit 1";
+        $result=$DB->read($query);
+        if($result){
+            $query="update users set otp=$otp where email='$email'";
+            $DB->save($query);
+            mail($email,"OTP - ACA Mobile","Your code is ".$otp);
+            $response['code']="50";
+            $response['msg']="We sent 6 OTP code to your emaill address. Please check your email and then enter the code here";
+
+        }else{
+            $response['code']="51";
+            $response['msg']="This email address had not registered yet!";
+        }
+
+        return $response;
+
+    }
+
+    private function OTP(){
+    
+        $length=6;
+        $number="";
+        for($i=0;$i<$length;$i++){
+            $new_rand=rand(0,9);	
+            $number=$number.$new_rand;
+        }
+        
+        return $number;
+    }
+
 }
 
 ?>

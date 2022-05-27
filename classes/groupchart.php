@@ -3,11 +3,12 @@ include('connect.php');
 include('auth.php');
 
 class Chart{
-
     public function orderAndSale($data){
         $user_id=$data['user_id'];
         $initial_time=$data['start_date']/1000;
         $final_time=$data['end_date']/1000;
+        $group_id=$data['group_id'];
+
         $response['hello']="world";
         $DB=new Database();
         $query1=" select 
@@ -18,7 +19,7 @@ class Chart{
             from businesses
             join business_details
             using (voucher_id)
-            where voucher_id>=$initial_time and voucher_id<= $final_time and agent_id=$user_id
+            where voucher_id>=$initial_time and voucher_id<= $final_time and agent_id=$user_id and group_id=$group_id
             group by product_id";
         $result1=$DB->read($query1);
 
@@ -40,7 +41,7 @@ class Chart{
             from businesses
             join business_details
             using (voucher_id)
-            where voucher_id>=$initial_time and voucher_id<= $final_time and admin_id=$user_id
+            where voucher_id>=$initial_time and voucher_id<= $final_time and admin_id=$user_id and group_id=$group_id
             group by product_id";
         $result2=$DB->read($query2);
         if($result2){
@@ -55,7 +56,7 @@ class Chart{
 
         $query3="select sum(admin_extra_cost) as admin_extra_cost
         from businesses
-        where voucher_id>=$initial_time and voucher_id<= $final_time and admin_id=$user_id
+        where voucher_id>=$initial_time and voucher_id<= $final_time and admin_id=$user_id and group_id=$group_id
         ";
 
 
@@ -66,7 +67,7 @@ class Chart{
 
         $query4="select sum(agent_extra_cost) as agent_extra_cost
         from businesses
-        where voucher_id>=$initial_time and voucher_id<= $final_time and agent_id=$user_id";
+        where voucher_id>=$initial_time and voucher_id<= $final_time and agent_id=$user_id and group_id=$group_id";
         $agentCost=$DB->read($query4);
 
         if(count($agentCost)>0)$agentCost=$agentCost[0]['agent_extra_cost'];
@@ -198,7 +199,7 @@ class Chart{
         $product_id=$data['product_id'];
         $initial_time=$data['start_date']/1000;
         $final_time=$data['end_date']/1000;
-
+        $group_id=$data['group_id'];
 
         //my order rate
         $query1="SELECT 
@@ -208,7 +209,7 @@ class Chart{
         FROM business_details
         JOIN businesses
         USING (voucher_id)
-        WHERE  voucher_id>=$initial_time and voucher_id<= $final_time and  agent_id=$user_id and product_id=$product_id
+        WHERE  voucher_id>=$initial_time and voucher_id<= $final_time and  agent_id=$user_id and product_id=$product_id and group_id=$group_id
         GROUP BY Month(FROM_UNIXTIME(voucher_id)); ";
 
         //sale rate
@@ -219,7 +220,7 @@ class Chart{
         FROM business_details
         JOIN businesses
         USING (voucher_id)
-        WHERE  voucher_id>=$initial_time and voucher_id<= $final_time and  admin_id=$user_id and product_id=$product_id
+        WHERE  voucher_id>=$initial_time and voucher_id<= $final_time and  admin_id=$user_id and product_id=$product_id and group_id=$group_id
         GROUP BY Month(FROM_UNIXTIME(voucher_id)); ";
 
         $DB=new Database();
@@ -247,6 +248,41 @@ class Chart{
         $response['query2']=$query2;
         return $response;
     }
+
+    public function filterOrderRate($data){
+        $user_id=$data['member_id'];
+        $initial_time=$data['start_date']/1000;
+        $final_time=$data['end_date']/1000;
+        $group_id=$data['group_id'];
+
+        $response['hello']="world";
+        $DB=new Database();
+        $query1=" select 
+            product_id,
+            sum(quantity) as count,
+            sum(foc) as foc
+            from businesses
+            join business_details
+            using (voucher_id)
+            where voucher_id>=$initial_time and voucher_id<= $final_time and agent_id=$user_id and group_id=$group_id
+            group by product_id";
+        $result1=$DB->read($query1);
+
+        if($result1){
+            for($i=0;$i<count($result1);$i++){
+                $product_id=$result1[$i]['product_id'];
+                $orders[$product_id]['count']=$result1[$i]['count'];
+                $orders[$product_id]['foc']=$result1[$i]['foc'];
+              
+            }
+
+            $response['orders']=$orders;
+        }
+
+        return $response;
+
+    }
+
 
 }
 

@@ -103,22 +103,77 @@ class TargetPlan{
     }
 
     public function getDetails($data){
+        $user_id=$data['user_id'];
         $target_plan_id=$data['target_plan_id'];
 
         $DB=new Database();
+        $response['hello']="world";
+
+        $query="select * from target_plans where target_plan_id=$target_plan_id limit 1";
+        $plan=$DB->read($query);
+
+        $initial_time=$plan[0]['start_date'];
+        $final_time=$plan[0]['end_date'];
+
+
         $query="select * from target_plan_details where target_plan_id=$target_plan_id";
         $result=$DB->read($query);
 
         if($result){
             for($i=0;$i<count($result);$i++){
                 $product_id=$result[$i]['product_id'];
-                $response[$product_id]['count']=$result[$i]['count'];
-            }
+                $plans[$product_id]['count']=$result[$i]['count'];
 
-            return $response;
+            }
+            $response['plans']=$plans;
         }
 
-       return false;
+
+        $query1=" select 
+            product_id,
+            sum(quantity) as count,
+            sum(foc) as foc
+            from businesses
+            join business_details
+            using (voucher_id)
+            where voucher_id>=$initial_time and voucher_id<= $final_time and agent_id=$user_id
+            group by product_id";
+        $result1=$DB->read($query1);
+
+        if($result1){
+            for($i=0;$i<count($result1);$i++){
+                $product_id=$result1[$i]['product_id'];
+                $orders[$product_id]['count']=$result1[$i]['count'];
+                $orders[$product_id]['foc']=$result1[$i]['foc'];
+              
+            }
+
+            $response['orders']=$orders;
+        }
+
+       return $response;
+    }
+
+    public function deleteTargetPlan($data){
+        $user_id=$data['user_id'];
+        $auth_token=$data['auth_token'];
+        $target_plan_id=$data['target_plan_id'];
+
+        $Auth=new Auth();
+        $userData=$Auth->checkAuthAndGetData($user_id,$auth_token);
+        if($userData==null){
+            $response['status']="fail";
+        }
+
+        $DB=new Database();
+        $query="delete from target_plan_details where target_plan_id=$target_plan_id";
+        $DB->save($query);
+        $query1="delete from target_plans where target_plan_id=$target_plan_id";
+        $DB->save($query1);
+
+        $response['status']="success";
+        return $response;
+
     }
 }
 

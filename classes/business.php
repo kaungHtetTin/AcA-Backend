@@ -1,6 +1,7 @@
 <?php
 include('connect.php');
 include('auth.php');
+include('notificationpusher.php');
 
 class Business{
     public function sentOrder($data){
@@ -13,9 +14,14 @@ class Business{
         $products=json_decode($productJSON,true);
 
         $DB=new Database();
-        $adminSelectQuery="select admin_id from groups where group_id=$group_id";
+        $adminSelectQuery="select admin_id,group_name from groups where group_id=$group_id";
         $admin=$DB->read($adminSelectQuery);
         $admin_id=$admin[0]['admin_id'];
+        $group_name=$admin[0]['group_name'];
+
+        $tokenQuery="select fcm_token from users where user_id=$admin_id limit 1";
+        $fcm_token=$DB->read($tokenQuery);
+        $fcm_token=$fcm_token[0]['fcm_token'];
 
         $query1="insert into businesses (agent_id,voucher_id,total_amount,group_id,admin_id) values
         ($agent_id,$voucher_id,$total_amount,$group_id,$admin_id)
@@ -41,6 +47,11 @@ class Business{
             $response['query'][$i]=$query2;
         }
 
+
+        $pusher =new NotificationPusher();
+        $pusher->pushNotificationToSingleUser($fcm_token,"New Order!",$group_name." group received a new order.");
+
+
         $response['status']="success";
         return $response;
 
@@ -55,14 +66,26 @@ class Business{
         $page=$page-1;
         $count=$page*$offset;
 
-        $query="select  
-        voucher_id,total_amount,group_name,seen,is_sold_out,is_received,group_image
-        from businesses
-        join groups using (group_id)
-        where businesses.agent_id=$agent_id and is_received=$is_received
-        order by businesses.id desc
-        limit $count,$offset
-        ";
+        if(isset($data['group_id'])){
+            $group_id=$data['group_id'];
+            $query="select  
+                voucher_id,total_amount,group_name,seen,is_sold_out,is_received,group_image
+                from businesses
+                join groups using (group_id)
+                where businesses.agent_id=$agent_id and is_received=$is_received and group_id=$group_id
+                order by businesses.id desc
+                limit $count,$offset
+                ";
+        }else{
+            $query="select  
+                voucher_id,total_amount,group_name,seen,is_sold_out,is_received,group_image
+                from businesses
+                join groups using (group_id)
+                where businesses.agent_id=$agent_id and is_received=$is_received
+                order by businesses.id desc
+                limit $count,$offset
+                ";
+        }
 
         $DB=new Database();
         $result=$DB->read($query);
@@ -265,9 +288,21 @@ class Business{
              $response['error']="not enough qty in stock";
             return $response;
         }
+
+       //send notification
+       $query="select * from businesses where voucher_id=$voucher_id limit 1";
+       $result=$DB->read($query);
+       $agent_id=$result[0]['agent_id'];
+
+       $query="select * from users where user_id=$agent_id limit 1";
+       $result=$DB->read($query);
+       $token=$result[0]['fcm_token'];
+
+        $pusher =new NotificationPusher();
+        $pusher->pushNotificationToSingleUser($token,"Order Delivered","Your business partner has delivered an order");
+
        
         $query="update businesses set is_sold_out=1,stock_id=$stock_id where voucher_id=$voucher_id and admin_id=$user_id";
-        
         $result=$DB->save($query);
         if($result){
             $response['status']="success";
@@ -277,6 +312,8 @@ class Business{
             $response['error']="business update fail";
             return $response;
         }
+
+
     }
 
     public function revceivedOrder($data){
@@ -363,6 +400,64 @@ class Business{
         return $response;
     }
 
+    public function cancelOrderByAdmin($data){
+        $user_id=$data['user_id'];
+        $voucher_id=$data['voucher_id'];
+        $auth_token=$data['auth_token'];
+
+        $DB=new Database();
+       
+        $Auth=new Auth();
+        $userData=$Auth->checkAuthAndGetData($user_id,$auth_token);
+        if($userData==null){
+            $response['status']="fail";
+            $response['error']="auth fail";
+            return $response;
+        }
+
+        $query="select * from businesses where voucher_id=$voucher_id";
+        $result=$DB->read($query);
+        $stock_id=$result[0]['stock_id'];
+
+
+        $query1="SELECT * FROM business_details where voucher_id=$voucher_id";
+        $details=$DB->read($query1);
+        $noErr=true;
+
+        if($details){
+            for($i=0;$i<count($details);$i++){
+                $product_id=$details[$i]['product_id'];
+                $qty=$details[$i]['quantity'];
+                $foc=$details[$i]['foc'];
+                $requiredQty=$qty+$foc;
+                
+                $query2="select * from stock_items where product_id=$product_id and stock_id=$stock_id";
+                $product=$DB->read($query2);
+                $count=$product[0]['count'];
+
+                $item_left=$count+$requiredQty;
+
+                $query3="update stock_items set count=$item_left where product_id=$product_id and stock_id=$stock_id";
+                $DB->save($query3);
+            }
+        }else{
+            $response['status']="fail";
+            $response['error']="Unexpected Error Occur!";
+            return $response;
+        }
+       
+        $query="update businesses set is_sold_out=0,stock_id=0 where voucher_id=$voucher_id and admin_id=$user_id";
+        
+        $result=$DB->save($query);
+        if($result){
+            $response['status']="success";
+            return $response;
+        }else{
+            $response['status']="fail";
+            $response['error']="business update fail";
+            return $response;
+        }
+    }
 
 
     public function addSale($data){
