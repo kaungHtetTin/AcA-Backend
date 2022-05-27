@@ -30,8 +30,7 @@ class Login{
         }
     }
 
-    public function login($email,$password){
-
+    public function loginUser($email,$password){
 
         $email=addslashes($email);
 		$password=addslashes($password);
@@ -67,7 +66,7 @@ class Login{
             return $res;
         }
 
-    }
+     }
 }
 
 ?>

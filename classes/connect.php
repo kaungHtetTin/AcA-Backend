@@ -3,9 +3,9 @@
 class Database{
 	
 	private $host ="localhost";
-	private $username="root";
-	private $password ="";
-	private $db="wenine";
+	private $username="u608908096_kaungAcA";
+	private $password ="Calamus@5241";
+	private $db="u608908096_acaDB";
 
 	function connect(){
 		
@@ -47,4 +47,6 @@ class Database{
 	}
 
 }
+
+?>
 

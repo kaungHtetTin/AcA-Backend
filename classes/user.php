@@ -214,6 +214,50 @@ class User{
         
         return $number;
     }
+    
+    public function checkOTP($data){
+        $email=$data['email'];
+        $otp=$data['otp'];
+        
+        $DB=new Database();
+        $query="select * from users where email='$email' limit 1";
+        $result=$DB->read($query);
+        if($result){
+            $code=$result[0]['otp'];
+            if($code==$otp){
+                $response['code']="50";
+                $response['msg']="OTP is correct.Now, You can enter your new password.";
+            }else{
+                $response['code']="51";
+                $response['msg']="OTP is not correct. Please try again!";
+            }
+        }else{
+            $response['code']="51";
+            $response['msg']="Unexpected error occurred!";
+        }
+        
+    
+        return $response;
+        
+    }
+    
+    public function resetPasswordByOTP($data){
+        $email=$data['email'];
+        $otp=$data['otp'];
+        $new_password=$data['new_password'];
+        $key = "koko&yoe"; 
+        $encrypt_password = md5(md5($email . $new_password) . $key);
+        
+        $DB=new Database();
+        $query="update users set password='$encrypt_password' where email='$email' and otp=$otp";
+        $DB->save($query);
+        
+        $response['code']="50";
+        $response['msg']="Success! Please press Login to login your account now.";
+        
+        return $response;
+        
+    }
 
 }
 
