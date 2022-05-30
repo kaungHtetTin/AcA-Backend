@@ -2,10 +2,15 @@
 
 class Database{
 	
+	// private $host ="localhost";
+	// private $username="u608908096_kaungAcA";
+	// private $password ="Calamus@5241";
+	// private $db="u608908096_acaDB";
+
 	private $host ="localhost";
-	private $username="u608908096_kaungAcA";
-	private $password ="Calamus@5241";
-	private $db="u608908096_acaDB";
+	private $username="root";
+	private $password ="";
+	private $db="wenine";
 
 	function connect(){
 		

@@ -60,10 +60,12 @@ class SignUp{
         $encrypt_password = md5(md5($email . $password) . $key);
         $user_id=$this->create_userid();
 
+        $valid_date=$join_time+(60*60*24*90);
+
         $querySignUp="insert into users 
-        (user_id,name,profile_image,email,phone,password,fcm_token,auth_token,join_time,verified)
+        (user_id,name,profile_image,email,phone,password,fcm_token,auth_token,join_time,verified,rank_id,valid_date)
         values
-        ('$user_id','$name','$profile_image','$email','$phone','$encrypt_password','$fcm_token','$auth_token',$join_time,$verified)
+        ('$user_id','$name','$profile_image','$email','$phone','$encrypt_password','$fcm_token','$auth_token',$join_time,$verified,1,$valid_date)
         ";
 
         $DB=new Database();

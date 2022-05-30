@@ -115,8 +115,13 @@ class Group{
             for($i=0;$i<count($members);$i++){
                 $member_id=$members[$i]['member_id'];
                 $member_name=$members[$i]['name'];
-                $queryCheck="select * from group_members where group_id=$group_id and member_id=$member_id limit 1";
                 $DB=new Database();
+                
+                $query="update users set verified=1 where user_id=$member_id";
+                $DB->save($query);
+
+                $queryCheck="select * from group_members where group_id=$group_id and member_id=$member_id limit 1";
+               
                 $check=$DB->read($queryCheck);
                 if($check){
                     $Info[$member_name]="had already added in this group";
@@ -300,7 +305,7 @@ class Group{
 
         $DB=new Database();
         $query="select
-            name,profile_image,email,phone,address
+            name,profile_image,email,phone,address,official_agent_id,rank_id
             from users where user_id=$member_id limit 1
         ";
         $info=$DB->read($query);

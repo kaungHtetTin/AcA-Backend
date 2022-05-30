@@ -6,10 +6,7 @@ class Login{
 
         $DB=new Database();
         $query="select 
-        name,
-        profile_image,
-        phone,
-        auth_token
+        *
         from users where user_id='$user_id' limit 1";
         $result=$DB->read($query);
 
@@ -19,6 +16,7 @@ class Login{
             if($row['auth_token']==$auth_token){
                 $res['auth']="success";
                 $res['data']=$row;
+                $res['version']="1.1";
                 return $res;
             }else{
                 $res['auth']="failure";
@@ -54,6 +52,11 @@ class Login{
                 $res['auth_token']=$auth_token;
                 $res['user_id']=$user_id;
                 $res['profile_image']=$row['profile_image'];
+                $res['rank_id']=$row['rank_id'];
+                $res['valid_date']=$row['valid_date'];
+                $res['verified']=$row['verified'];
+                $res['version']="1.1";
+
                 return $res;
             }else{
                 $res['auth']="fail";

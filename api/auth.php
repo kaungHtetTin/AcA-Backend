@@ -1,8 +1,8 @@
 <?php
     include('../classes/login.php');
 
-    $user_id=$_GET['user_id'];
-    $auth_token=$_GET['auth_token'];
+    $user_id=$_POST['user_id'];
+    $auth_token=$_POST['auth_token'];
 
     $login=new Login();
     $result=$login-> authRefresh($user_id,$auth_token);

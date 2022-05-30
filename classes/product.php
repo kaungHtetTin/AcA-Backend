@@ -10,6 +10,10 @@ class Product {
 
         $query2="Select * from brands";
         $result['brands']=$DB->read($query2);
+    
+        $query3="select * from ranks";
+        $result['ranks']=$DB->read($query3);
+
         return $result;
     }
 

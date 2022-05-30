@@ -6,7 +6,7 @@ class User{
     public function getUserProfile($user_id){
         $DB=new Database();
         $query="SELECT 
-        name,profile_image,email,phone,address
+        name,profile_image,email,phone,address,official_agent_id,valid_date
         FROM users WHERE user_id=$user_id";
 
         $result=$DB->read($query);
@@ -257,6 +257,16 @@ class User{
         
         return $response;
         
+    }
+
+    public function getUserValidData($data){
+        $user_id=$data['user_id'];
+
+        $DB=new Database();
+        $query="select * from users where user_id=$user_id limit 1";
+        $result=$DB->read($query);
+
+        return $result[0];
     }
 
 }
