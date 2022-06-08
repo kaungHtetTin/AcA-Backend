@@ -352,7 +352,7 @@ class Group{
             from businesses
             join business_details
             using (voucher_id)
-            where voucher_id>=$initial_time and voucher_id<= $final_time and agent_id=$member_id and group_id=$group_id
+            where voucher_id>=$initial_time and voucher_id<= $final_time and admin_id=$member_id
             group by product_id
         ";
 
@@ -362,7 +362,7 @@ class Group{
                 $product_id=$result3[$i]['product_id'];
                 $order_detail[$product_id]['count']=$result3[$i]['count'];
             }
-            $response['order_detail']=$order_detail;
+            $response['sale_detail']=$order_detail; //this is sale rate
         }
 
         return $response;

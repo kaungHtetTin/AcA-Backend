@@ -148,7 +148,7 @@ class TargetPlan{
               
             }
 
-            $response['orders']=$orders;
+            $response['sales']=$orders; //this is sale rate
         }
 
        return $response;

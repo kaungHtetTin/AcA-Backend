@@ -228,6 +228,40 @@ class Business{
         }
     }
 
+     public function updateDetailPrice($data){
+        $user_id=$data['user_id'];
+        $auth_token=$data['auth_token'];
+
+        $voucher_id=$data['content_id'];
+        $product_id=$data['extra1'];
+
+        $key=$data['key'];
+        $value=$data['value'];
+
+        $Auth=new Auth();
+        $userData=$Auth->checkAuthAndGetData($user_id,$auth_token);
+        if($userData!=null){
+           
+            $query="update business_details set $key='$value' where voucher_id=$voucher_id and product_id=$product_id";
+            $query1="update businesses set price_edit=1 where voucher_id=$voucher_id";
+            $DB=new Database();
+            $result=$DB->save($query);
+            $result1=$DB->save($query1);
+            if($result){
+                $response['status']="success";
+                return $response;
+            }else{
+                $response['status']=$data;
+                return $response;
+            }
+           
+        }else{
+            $response['status']="fail";
+            return $response;
+        }
+    }
+
+
     public function soldOutOrder($data){
         $user_id=$data['user_id'];
         $voucher_id=$data['voucher_id'];
@@ -446,7 +480,20 @@ class Business{
             return $response;
         }
        
-        $query="update businesses set is_sold_out=0,stock_id=0 where voucher_id=$voucher_id and admin_id=$user_id";
+      
+
+
+        if(isset($data['voucher_cancel'])){
+            $del1="DELETE FROM business_details where voucher_id=$voucher_id";
+            $del2="DELETE FROM businesses where voucher_id=$voucher_id";
+            $del3="DELETE FROM sales where voucher_id=$voucher_id";
+            $DB->save($del1);
+            $DB->save($del2);
+            $DB->save($del3);
+        }else{
+            $query="update businesses set is_sold_out=0,stock_id=0 where voucher_id=$voucher_id and admin_id=$user_id";
+        }
+
         
         $result=$DB->save($query);
         if($result){
@@ -532,21 +579,34 @@ class Business{
 
     public function getSales($data){
         $user_id=$data['user_id'];
+        $customer=$data['customer'];
 
         $offset=30;
         $page=$data['page'];
         $page=$page-1;
         $count=$page*$offset;
 
-        $query="select  
-        voucher_id,total_amount,customer_name,is_agent
-        from businesses
-        join sales
-        using (voucher_id)
-        where businesses.admin_id=$user_id
-        order by businesses.id desc
-        limit $count,$offset
-        ";
+        if($customer=="yoe"){
+            $query="select  
+            voucher_id,total_amount,customer_name,is_agent
+            from businesses
+            join sales
+            using (voucher_id)
+            where businesses.admin_id=$user_id
+            order by businesses.id desc
+            limit $count,$offset
+            ";
+        }else{
+            $query="select  
+            voucher_id,total_amount,customer_name,is_agent
+            from businesses
+            join sales
+            using (voucher_id)
+            where businesses.admin_id=$user_id and sales.customer_phone=$customer
+            order by businesses.id desc
+            limit $count,$offset
+            ";
+        }
 
         $DB=new Database();
         $result=$DB->read($query);
@@ -560,7 +620,7 @@ class Business{
         $voucher_id=$data['voucher_id'];
 
         $DB=new Database();
-        $query1 ="select stock_id,agent_extra_cost from businesses where voucher_id=$voucher_id and admin_id=$user_id";
+        $query1 ="select stock_id,admin_extra_cost from businesses where voucher_id=$voucher_id and admin_id=$user_id";
         $voucher=$DB->read($query1);
         $response['voucher']=$voucher[0];
 
