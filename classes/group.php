@@ -117,21 +117,27 @@ class Group{
                 $member_name=$members[$i]['name'];
                 $DB=new Database();
                 
-                $query="update users set verified=1 where user_id=$member_id";
-                $DB->save($query);
-
-                $queryCheck="select * from group_members where group_id=$group_id and member_id=$member_id limit 1";
-               
-                $check=$DB->read($queryCheck);
-                if($check){
-                    $Info[$member_name]="had already added in this group";
-                }else{
-                    $query="insert into group_members (group_id,member_id,time) values($group_id,$member_id,$time)";
-                    $save=$DB->save($query);
-                
-                    $Info[$member_name]="had successfully added in this group";
-                
+                if($user_id!=$member_id){
+                    
+                    $query="update users set verified=1 where user_id=$member_id";
+                    $DB->save($query);
+    
+                    $queryCheck="select * from group_members where group_id=$group_id and member_id=$member_id limit 1";
+                   
+                    $check=$DB->read($queryCheck);
+                    
+                    
+                    if($check){
+                        $Info[$member_name]="had already added in this group";
+                    }else{
+                            $query="insert into group_members (group_id,member_id,time) values($group_id,$member_id,$time)";
+                            $save=$DB->save($query);
+           
+                            $Info[$member_name]="had successfully added in this group";
+                    
+                    }
                 }
+                
             }
             return $Info;
             
