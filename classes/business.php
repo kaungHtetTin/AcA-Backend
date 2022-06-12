@@ -514,6 +514,7 @@ class Business{
         $total_amount=$data['total_amount'];
         $productJSON=$data['productJSON'];
         $stock_id=$data['stock_id'];
+        $extra_cost=$data['extra_cost'];
 
         $is_agent=$data['is_agent'];
         $customer_name=$data['customer_name'];
@@ -535,8 +536,8 @@ class Business{
 
         $DB=new Database();
 
-        $query1="insert into businesses (agent_id,voucher_id,total_amount,group_id,admin_id,stock_id) values
-        (0,$voucher_id,$total_amount,$group_id,$admin_id,$stock_id)
+        $query1="insert into businesses (agent_id,voucher_id,total_amount,group_id,admin_id,stock_id,admin_extra_cost) values
+        (0,$voucher_id,$total_amount,$group_id,$admin_id,$stock_id,$extra_cost)
         ";
 
         $DB->save($query1);
