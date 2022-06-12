@@ -559,7 +559,7 @@ class Business{
             $product=$DB->read($query3);
             $count=$product[0]['count'];
 
-            $item_left=$count-$quantity;
+            $item_left=$count-$quantity-$foc;
             $query4="update stock_items set count=$item_left where product_id=$product_id and stock_id=$stock_id";
             $DB->save($query4);
         }
