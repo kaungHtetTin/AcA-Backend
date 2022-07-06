@@ -44,7 +44,8 @@ class Login{
             $row=$result[0];
             $user_id=$row['user_id'];
             if($row['password']==$encrypt_password){
-                $auth_token= uniqid();
+                //$auth_token= uniqid();
+                $auth_token=$encrypt_password;
                 $queryAuth="update users set auth_token='$auth_token' where user_id=$user_id";
                 $DB->save($queryAuth);
 
