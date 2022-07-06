@@ -1,7 +1,7 @@
 <?php
 
  
-$check['version']=1.1;
+$check['version']=1.2;
 $check['status']="
 The latest version is 1.2
 ";
