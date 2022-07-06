@@ -88,7 +88,8 @@ class Group{
 
         $query="select user_id,name,profile_image from group_members 
                 join users on member_id=user_id
-                where group_id=$group_id limit $count,$offset ";
+                where group_id=$group_id and disable=0
+                limit $count,$offset ";
 
         $DB=new Database();
         $result=$DB->read($query);
@@ -98,7 +99,7 @@ class Group{
 
     }
 
-      public function addMembers($data){
+    public function addMembers($data){
         $user_id=$data['user_id'];
         $group_id=$data['group_id'];
         $auth_token=$data['auth_token'];
@@ -141,6 +142,33 @@ class Group{
             }
             return $Info;
             
+        }
+
+    }
+
+    public function disableGroupMember($data){
+        $group_id=$data['group_id'];
+        $member_id=$data['member_id'];
+        $auth_token=$data['auth_token'];
+        $user_id=$data['user_id'];
+        $Auth=new Auth();
+        $userData=$Auth->checkAuthAndGetData($user_id,$auth_token);
+        
+        if($userData!=null){
+            $query="update group_members set disable=1 where group_id=$group_id and member_id=$member_id";
+            $DB=new Database();
+            $result=$DB->save($query);
+            if($result){
+                $response['status']="success";
+                return $response;
+            }else{
+                $response['status']="fail";
+                return $response;
+            }
+           
+        }else{
+            $response['status']="fail";
+            return $response;
         }
 
     }

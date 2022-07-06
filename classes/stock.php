@@ -157,6 +157,18 @@ class Stock{
     }
     
 
+    public function getInvestment($data){
+        $owner_id=$data['owner_id'];
+        $query ="select 
+        product_id, SUM(count) as total,product_name 
+        from stock_items 
+        join products using(product_id)
+        where owner_id=$owner_id group by product_id";
+        $DB=new Database();
+        $result=$DB->read($query);
+
+        return $result;
+    }
 }
 
 ?>

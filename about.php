@@ -29,7 +29,7 @@
         <h2>VIP Licence သက်တမ်းတိုးခြင်း &#128081;</h2>
         <p>AcA Mobile App အား ဆက်လက်အသုံးပြုခွင့်ရရှိရန် လူကြီးမင်း၏ VIP အသုံးပြုခွင့်သက်တမ်း တိုးမြင့်ရန်လိုအပ်ပါသည်။</p>
         <div class="card text-left">
-            <div class="card-header bg-warning text-white">သင်တန်းများ </div>
+            <div class="card-header bg-warning text-white">Plans </div>
           <div class="card-body">
             <div>
                 

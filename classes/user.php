@@ -269,6 +269,23 @@ class User{
         return $result[0];
     }
 
+    public function promoteRank($data){
+        $user_id=$data['user_id'];
+        $rank_id=$data['rank_id'];
+        $query="update users set rank_id=$rank_id where user_id=$user_id";
+        $DB=new Database();
+        $result=$DB->save($query);
+        if($result){
+            $response['status']="success";
+            return $response;
+        }else{
+            $response['status']="fail";
+            return $response;
+        }
+
+    }
+
+
 }
 
 ?>

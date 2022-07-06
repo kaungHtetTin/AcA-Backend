@@ -10,8 +10,9 @@ class Business{
         $total_amount=$data['total_amount'];
         $group_id=$data['group_id'];
         $productJSON=$data['productJSON'];
-
         $products=json_decode($productJSON,true);
+        $price_edit=0;
+        if(isset($data['price_edit'])) $price_edit=$data['price_edit'];
 
         $DB=new Database();
         $adminSelectQuery="select admin_id,group_name from groups where group_id=$group_id";
@@ -23,8 +24,8 @@ class Business{
         $fcm_token=$DB->read($tokenQuery);
         $fcm_token=$fcm_token[0]['fcm_token'];
 
-        $query1="insert into businesses (agent_id,voucher_id,total_amount,group_id,admin_id) values
-        ($agent_id,$voucher_id,$total_amount,$group_id,$admin_id)
+        $query1="insert into businesses (agent_id,voucher_id,total_amount,group_id,admin_id,price_edit) values
+        ($agent_id,$voucher_id,$total_amount,$group_id,$admin_id,$price_edit)
         ";
 
       
