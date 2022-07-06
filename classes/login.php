@@ -16,7 +16,7 @@ class Login{
             if($row['auth_token']==$auth_token){
                 $res['auth']="success";
                 $res['data']=$row;
-                $res['version']="1.1";
+                $res['version']="1.2";
                 return $res;
             }else{
                 $res['auth']="failure";
