@@ -199,7 +199,7 @@ class Group{
         from groups
         join group_members using (group_id)
         join users on groups.admin_id=users.user_id
-         where group_members.member_id=$user_id and group_members.disable=0 and groups.disable=0
+        where group_members.member_id=$user_id and group_members.disable=0 and groups.disable=0
         ";
 
       
