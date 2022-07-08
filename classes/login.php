@@ -16,7 +16,7 @@ class Login{
             if($row['auth_token']==$auth_token){
                 $res['auth']="success";
                 $res['data']=$row;
-                $res['version']="1.2";
+                $res['version']="1.3";
                 return $res;
             }else{
                 $res['auth']="failure";
@@ -56,7 +56,7 @@ class Login{
                 $res['rank_id']=$row['rank_id'];
                 $res['valid_date']=$row['valid_date'];
                 $res['verified']=$row['verified'];
-                $res['version']="1.1";
+                $res['version']="1.3";
 
                 return $res;
             }else{
