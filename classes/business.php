@@ -242,19 +242,48 @@ class Business{
         $Auth=new Auth();
         $userData=$Auth->checkAuthAndGetData($user_id,$auth_token);
         if($userData!=null){
-           
-            $query="update business_details set $key='$value' where voucher_id=$voucher_id and product_id=$product_id";
-            $query1="update businesses set price_edit=1 where voucher_id=$voucher_id";
             $DB=new Database();
+            $packQuery="select pack,pack_price from products where product_id=$product_id";
+            $product=$DB->read($packQuery);
+            $pack=$product[0]['pack'];
+            $pack_price=$product[0]['pack_price'];
+            
+            $quantityQuery="select quantity from business_details where voucher_id=$voucher_id and product_id=$product_id";
+            $resultQty=$DB->read($quantityQuery);
+            
+            $quantity=$resultQty[0]['quantity'];
+          
+            
+            $quantity2=$resultQty[0]['quantity'];
+            
+            $quantity=$quantity/$pack;
+            $updateAmount=floor($quantity)*$value;
+            
+             $temp=($quantity2%$pack);
+             $temp=$temp*$pack_price;
+             $updateAmount=$updateAmount+$temp;
+        
+          
+            $query="update business_details set $key='$value' , amount='$updateAmount' where voucher_id=$voucher_id and product_id=$product_id";
             $result=$DB->save($query);
-            $result1=$DB->save($query1);
-            if($result){
-                $response['status']="success";
-                return $response;
-            }else{
-                $response['status']=$data;
-                return $response;
+          
+            
+            
+            $voucherQuery="select * from business_details where voucher_id=$voucher_id";
+            $voucherDetails=$DB->read($voucherQuery);
+            
+            $totalAmount=0;
+            for($i=0;$i<count($voucherDetails);$i++){
+                $amount=$voucherDetails[$i]['amount'];
+                
+                $totalAmount+=$amount;
             }
+            
+            $query1="update businesses set price_edit=1, total_amount=$totalAmount where voucher_id=$voucher_id";
+            $result1=$DB->save($query1);
+            
+            $response['status']="success";
+            return $response;
            
         }else{
             $response['status']="fail";
